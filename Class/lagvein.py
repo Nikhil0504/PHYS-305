@@ -13,18 +13,21 @@ def Lagvein1D(R, totaltime, dt):
 
     x = np.zeros((2, Steps), 'float')
     v = np.zeros((2, Steps), 'float')
-    time = np.array([i * dt for i in range(Steps)], 'float')
+    time = np.arange(0, Steps * dt, dt, dtype='float')
 
-    for i in range(Steps):
-        xi = c * np.random.randn(2)
+    xi = c * np.random.randn(2, Steps)
 
-        v[:, i] = ((1-zeta*dt/2/m)*v[:,i-1] + dt*xi/m)/(1+zeta*dt/2/m)
-        vmid = 0.5*( v[:,i] + v[:,i-1] )
-        x[:,i] = x[:,i-1] + dt*vmid
-    
-    plt.plot(x[0,:],x[1,:])
-    plt.show()
+    v[:, 0] = np.zeros(2)
+    x[:, 0] = np.zeros(2)
+
+    for i in range(1, Steps):
+        v[:, i] = ((1 - zeta * dt / 2 / m) * v[:, i - 1] + dt * xi[:, i] / m) / (1 + zeta * dt / 2 / m)
+        vmid = 0.5 * (v[:, i] + v[:, i - 1])
+        x[:, i] = x[:, i - 1] + dt * vmid
+
     return time,x,v
 
-Lagvein1D(1, 10, 0.01)
-                    
+
+time, x, v = Lagvein1D(1, 10,)
+plt.plot(x[0, :], x[1, :])
+plt.show()
