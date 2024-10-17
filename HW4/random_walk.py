@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Set the random seed for reproducibility
 seed = 42
 np.random.seed(seed)
 
@@ -18,10 +19,12 @@ def randomWalk2D(b, N):
 
     MSDX = np.zeros(N)
     MSDY = np.zeros(N)
-    
+
+    # Generate random steps in X and Y directions, either -b or +b
     stepsX = np.where(np.random.rand(N-1) < 0.5, -b, b)
     stepsY = np.where(np.random.rand(N-1) < 0.5, -b, b)
 
+    # Compute the x and y coordinates
     x[1:] = np.cumsum(stepsX)
     y[1:] = np.cumsum(stepsY)
     
@@ -34,6 +37,10 @@ def randomWalk2D(b, N):
     return x, y, avgDispX, avgDispY, MSDX, MSDY
 
 def analyze_random_walk(randomWalk2D):
+    """
+    Analyze the 2D random walk with step size b and N steps.
+    Plot the random walk, mean square displacement, and average displacement.
+    """
     b, N = 1, 1_000
     x, y, avgDispX, avgDispY, MSDX, MSDY = randomWalk2D(b, N)
 
@@ -65,8 +72,8 @@ def analyze_random_walk(randomWalk2D):
 
     plt.show()
 
-    # print("Average Displacement: ", avgDisp[-1])
-    # print('Average Displacement at 0th point:', avgDisp[0])
+    print("Average Displacement: ", avgDispX[-1])
+    print('Average Displacement at 0th point:', avgDispX[0])
     
     print('Expected Value of MSD at Nth point:', MSD[-1])
     print('2Nb^2:', 2*N*(b**2))

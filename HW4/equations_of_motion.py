@@ -1,81 +1,79 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def initialize_conditions():
-    mass = 1.0
-    constant1 = 1
-    alpha = 1
-    beta = 1
+def forward_euler(m, v0, zeta, alpha, beta, r1_init, r2_init, v1_init, v2_init, d1_init, d2_init, dt, steps):
+    # Initialize variables
+    r1, r2 = r1_init, r2_init
+    v1, v2 = v1_init, v2_init
+    d1, d2 = d1_init, d2_init
     
-    # Initial Positions
-    r1 = np.array([0.0, 0.0, 0.0])
-    r2 = np.array([1.0, 0.0, 0.0])
+    positions_r1 = []
+    positions_r2 = []
+    velocities_v1 = []
+    velocities_v2 = []
     
-    # Initial Directions (unit vectors)
-    d1 = np.array([1.0, 0.0, 0.0])
-    d2 = np.array([0.0, 0.0, 1.0])
-    
-    dt = 0.1
-    timestep = 1000
-    v0 = 10
-    
-    return r1, r2, d1, d2, mass, constant1, alpha, beta, dt, timestep, v0
+    for _ in range(steps):
+        # Compute r and its magnitude
+        r = np.linalg.norm(r1 - r2)
 
-def compute_accelerations(r1, r2, d1, d2, v1, v2, v0, zeta, alpha, beta, mass):
-    r = np.linalg.norm(r1 - r2)
-
-    dv1_dt = (zeta * ((v0 * d1) - v1) + (alpha / r) * (v2 - v1)) / mass
-    dd1_dt = beta / (r * r) * np.cross(np.cross(d1, d2), d1)
-
-    dv2_dt = (zeta * ((v0 * d2) - v2) + (alpha / r) * (v1 - v2)) / mass
-    dd2_dt = beta / (r * r) * np.cross(np.cross(d2, d1), d2)
-
-    return dv1_dt, dd1_dt, dv2_dt, dd2_dt
-
-def update_positions_and_directions(r1, r2, d1, d2, v1, v2, dv1_dt, dv2_dt, dd1_dt, dd2_dt, dt, v0):
-    d1 = d1 + dd1_dt * dt
-    d2 = d2 + dd2_dt * dt
-
-    # Normalizing these vectors
-    d1 = d1 / np.linalg.norm(d1)
-    d2 = d2 / np.linalg.norm(d2)
-    
-    v1 = v0 * d1
-    v2 = v0 * d2
-    
-    r1 = r1 + (dv1_dt * dt)
-    r2 = r2 + (dv2_dt * dt)
-    
-    return r1, r2, d1, d2, v1, v2
-
-def question_1_equations(r1, r2, d1, d2, mass, constant1, alpha, beta, dt, timestep, v0):
-    v1 = v0 * d1
-    v2 = v0 * d2
-    
-    r1_total = np.zeros((timestep, 3))
-    r2_total = np.zeros((timestep, 3))
-    
-    r1_total[0] = r1
-    r2_total[0] = r2
-    
-    for step in range(1, timestep):
-        dv1_dt, dd1_dt, dv2_dt, dd2_dt = compute_accelerations(r1, r2, d1, d2, v1, v2, v0, constant1, alpha, beta, mass)
-        r1, r2, d1, d2, v1, v2 = update_positions_and_directions(r1, r2, d1, d2, v1, v2, dv1_dt, dv2_dt, dd1_dt, dd2_dt, dt, v0)
+        # equations of motion
+        dv1_dt = (zeta / m) * (v0 * d1 - v1) + (alpha / (m * r)) * (v2 - v1)
+        dv2_dt = (zeta / m) * (v0 * d2 - v2) + (alpha / (m * r)) * (v1 - v2)
         
-        r1_total[step] = r1
-        r2_total[step] = r2
         
-    return r1_total, r2_total
-
-def plot_results(r1_total, r2_total):
-    plt.plot(r1_total)
-    plt.plot(r2_total)
-    plt.show()
-
-def question_1():
-    r1, r2, d1, d2, mass, constant1, alpha, beta, dt, timestep, v0 = initialize_conditions()
-    r1_total, r2_total = question_1_equations(r1, r2, d1, d2, mass, constant1, alpha, beta, dt, timestep, v0)
-    plot_results(r1_total, r2_total)
-    print(r1_total[-1])
+        dd1_dt = (beta / r**2) * np.cross(np.cross(d1, d2), d1)
+        dd2_dt = (beta / r**2) * np.cross(np.cross(d2, d1), d2)
         
-question_1()
+        # Update velocities and directions using forward Euler method
+        v1 += dv1_dt * dt
+        v2 += dv2_dt * dt
+        d1 += dd1_dt * dt
+        d2 += dd2_dt * dt
+
+        # Normalize d1 and d2 to ensure they remain unit vectors
+        d1 /= np.linalg.norm(d1)
+        d2 /= np.linalg.norm(d2)
+        
+        # Update positions
+        r1 += v1 * dt
+        r2 += v2 * dt
+        
+        positions_r1.append(r1.copy())
+        positions_r2.append(r2.copy())
+        velocities_v1.append(v1.copy())
+        velocities_v2.append(v2.copy())
+    
+    return np.array(positions_r1), np.array(positions_r2), np.array(velocities_v1), np.array(velocities_v2)
+
+# Example usage of the function
+m = 1.0  # mass
+v0 = 1.0  # constant swimming speed
+zeta = 0.5  # constant
+alpha = 0.1  # constant
+beta = 0.2  # constant
+dt = 0.01  # time step
+steps = 1000  # number of steps
+
+# Initial positions and velocities
+r1_init = np.array([1.0, 0.0, 0.0])
+r2_init = np.array([-1.0, 0.0, 0.0])
+v1_init = np.array([0.0, 1.0, 0.0])
+v2_init = np.array([0.0, -1.0, 0.0])
+d1_init = np.array([1.0, 0.0, 0.0])
+d2_init = np.array([-1.0, 0.0, 0.0])
+
+# Run the forward Euler solver
+positions_r1, positions_r2, velocities_v1, velocities_v2 = forward_euler(m, v0, zeta, alpha, beta, r1_init, r2_init, v1_init, v2_init, d1_init, d2_init, dt, steps)
+
+# Plot the trajectories of the two objects
+plt.figure(figsize=(10, 6))
+
+plt.plot(positions_r1[:, 0], positions_r1[:, 1], label="Object 1 Trajectory", color='blue')
+plt.plot(positions_r2[:, 0], positions_r2[:, 1], label="Object 2 Trajectory", color='red')
+
+plt.title("Trajectories of Two Self-Propelled Objects")
+plt.xlabel("x position")
+plt.ylabel("y position")
+plt.legend()
+plt.grid(True)
+plt.show()
