@@ -33,30 +33,40 @@ def GJ(A,b):
     return x
 
 
-N = 500
+N = 5000
 # define a large second derivative matrix
 A = np.zeros((N,N))
 A[0,0] = 1
-for i in range(1,N-1):
-    A[i,i-1:i+2] = [1,-2,1]
+A[1:N-1, 0:N-2] += np.eye(N-2)
+A[1:N-1, 1:N-1] -= 2 * np.eye(N-2)
+A[1:N-1, 2:N] += np.eye(N-2)
 
 A[N-1,N-1] = 1
-# define the solution vector
-b = np.ones(N)# put in correct boundary conditions
-b[0] = 0
-b[N-1] = 0
+print(A)
+# # define the solution vector
+# b = np.ones(N)# put in correct boundary conditions
+# b[0] = 0
+# b[N-1] = 0
 
-from time import time
-t1 = time()
-x1 = GJ(A,b)
-t2 = time()
-print(f'GJ time: {t2-t1:.4f}')
+# from time import time
+# t1 = time()
+# x1 = GJ(A,b)
+# t2 = time()
+# print(f'GJ time: {t2-t1:.4f}')
 
-t3 = time()
-x2 = np.linalg.solve(A,b)
-t4 = time()
+# t3 = time()
+# x2 = np.linalg.solve(A,b)
+# t4 = time()
 
-print(f'numpy time: {t4-t3:.4f}')
+# print(f'numpy time: {t4-t3:.4f}')
 
-# check if the two solutions are the same
-print(np.allclose(x1,x2))
+# from scipy.sparse.linalg import spsolve
+# from scipy.sparse import csr_matrix
+# t5 = time()
+# x3 = spsolve(csr_matrix(A),b)
+# t6 = time()
+# print(f'spsolve time: {t6-t5:.4f}')
+
+# # check if the two solutions are the same
+# print(np.allclose(x1,x2))
+# print(np.allclose(x1,x3))
