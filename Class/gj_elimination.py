@@ -33,7 +33,7 @@ def GJ(A,b):
     return x
 
 
-N = 5000
+N = 500
 # define a large second derivative matrix
 A = np.zeros((N,N))
 A[0,0] = 1
@@ -43,16 +43,16 @@ A[1:N-1, 2:N] += np.eye(N-2)
 
 A[N-1,N-1] = 1
 print(A)
-# # define the solution vector
-# b = np.ones(N)# put in correct boundary conditions
-# b[0] = 0
-# b[N-1] = 0
+# define the solution vector
+b = np.ones(N)# put in correct boundary conditions
+b[0] = 0
+b[N-1] = 0
 
-# from time import time
-# t1 = time()
-# x1 = GJ(A,b)
-# t2 = time()
-# print(f'GJ time: {t2-t1:.4f}')
+from time import time
+t1 = time()
+x1 = GJ(A,b)
+t2 = time()
+print(f'GJ time: {t2-t1:.4f}')
 
 # t3 = time()
 # x2 = np.linalg.solve(A,b)
